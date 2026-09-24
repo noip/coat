@@ -1,55 +1,67 @@
 package de.siphalor.coat.cursor;
 
-import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.cursor.CursorType;
-import com.mojang.datafixers.util.Pair;
+//# if MC_VERSION_NUMBER >= 260300
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
+//# else
+//- import com.mojang.blaze3d.platform.NativeImage;
+//- import com.mojang.datafixers.util.Pair;
+//- import org.jetbrains.annotations.Nullable;
+//- import org.lwjgl.glfw.GLFW;
+//- import org.lwjgl.glfw.GLFWImage;
+//- import org.lwjgl.system.MemoryUtil;
+//- import java.nio.ByteBuffer;
+//# end
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWImage;
-import org.lwjgl.system.MemoryUtil;
-
-import java.nio.ByteBuffer;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CoatCursorTypes {
-	private static Pair<CursorType, ByteBuffer> helpCursor;
-
+//# if MC_VERSION_NUMBER >= 260300
 	public static CursorType helpCursor() {
-		return helpCursor.getFirst();
+		return CursorTypes.POINTING_HAND;
 	}
 
 	public static void initialize() {
-		helpCursor = createCursor("help");
 	}
+//# else
+//- 	private static Pair<CursorType, ByteBuffer> helpCursor;
 
-	private static Pair<CursorType, @Nullable ByteBuffer> createCursor(String name) {
-		try (var is = CoatCursorTypes.class.getClassLoader().getResourceAsStream("coat/cursor/" + name + ".png")) {
-			if (is == null) {
-				throw new IllegalStateException("Failed to load help cursor");
-			}
+//- 	public static CursorType helpCursor() {
+//- 		return helpCursor.getFirst();
+//- 	}
 
-			var nativeImage = NativeImage.read(is);
-			int[] pixels = nativeImage.getPixels();
-			var glfwImage = GLFWImage.create();
+//- 	public static void initialize() {
+//- 		helpCursor = createCursor("help");
+//- 	}
 
-			// Allocate native memory that GLFW can use
-			ByteBuffer pixelBuffer = MemoryUtil.memAlloc(pixels.length * 4);
-			for (int pixel : pixels) {
-				pixelBuffer.putInt(pixel);
-			}
-			pixelBuffer.flip();
+//- 	private static Pair<CursorType, @Nullable ByteBuffer> createCursor(String name) {
+//- 		try (var is = CoatCursorTypes.class.getClassLoader().getResourceAsStream("coat/cursor/" + name + ".png")) {
+//- 			if (is == null) {
+//- 				throw new IllegalStateException("Failed to load help cursor");
+//- 			}
 
-			glfwImage.set(nativeImage.getWidth(), nativeImage.getHeight(), pixelBuffer);
-			long helpCursorHandle = GLFW.glfwCreateCursor(glfwImage, 0, 0);
+//- 			var nativeImage = NativeImage.read(is);
+//- 			int[] pixels = nativeImage.getPixels();
+//- 			var glfwImage = GLFWImage.create();
 
-			return Pair.of(new CursorType("coat:" + name, helpCursorHandle), pixelBuffer);
-		} catch (Exception e) {
-			log.error("Failed to load help cursor", e);
-			return Pair.of(CursorType.DEFAULT, null);
-		}
-	}
+//- 			// Allocate native memory that GLFW can use
+//- 			ByteBuffer pixelBuffer = MemoryUtil.memAlloc(pixels.length * 4);
+//- 			for (int pixel : pixels) {
+//- 				pixelBuffer.putInt(pixel);
+//- 			}
+//- 			pixelBuffer.flip();
+
+//- 			glfwImage.set(nativeImage.getWidth(), nativeImage.getHeight(), pixelBuffer);
+//- 			long helpCursorHandle = GLFW.glfwCreateCursor(glfwImage, 0, 0);
+
+//- 			return Pair.of(new CursorType("coat:" + name, helpCursorHandle), pixelBuffer);
+//- 		} catch (Exception e) {
+//- 			log.error("Failed to load help cursor", e);
+//- 			return Pair.of(CursorType.DEFAULT, null);
+//- 		}
+//- 	}
+//# end
 }

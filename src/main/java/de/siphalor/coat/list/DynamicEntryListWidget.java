@@ -35,6 +35,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 //- import net.minecraft.client.renderer.ShaderManager;
 //- import net.minecraft.client.renderer.ShaderProgram;
 //- import net.minecraft.client.renderer.RenderType;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.resources.Identifier;
 //- import net.minecraft.resources.ResourceLocation;
@@ -686,7 +687,12 @@ public class DynamicEntryListWidget<E extends DynamicEntryListWidget.Entry> exte
 	}
 
 	protected void updateScrollingState(double mouseX, double mouseY, int button) {
-		this.scrolling = button == 0 && mouseX >= (double) this.getScrollbarPositionX() && mouseX < (double) (this.getScrollbarPositionX() + 6);
+		//# if MC_VERSION_NUMBER >= 260300
+		int scrollbarX = this.getScrollbarPositionX();
+		this.scrolling = (button == InputConstants.MOUSE_BUTTON_LEFT || button == 0) && mouseX >= (double) (scrollbarX - 2) && mouseX < (double) (scrollbarX + 8);
+		//# else
+		//- this.scrolling = button == 0 && mouseX >= (double) this.getScrollbarPositionX() && mouseX < (double) (this.getScrollbarPositionX() + 6);
+		//# end
 	}
 
 	protected int getScrollbarPositionX() {
@@ -727,6 +733,7 @@ public class DynamicEntryListWidget<E extends DynamicEntryListWidget.Entry> exte
 
 	//# if MC_VERSION_NUMBER >= 12110
 	public boolean mouseReleased(MouseButtonEvent event) {
+		this.scrolling = false;
 		if (this.getFocused() != null) {
 			this.getFocused().mouseReleased(event);
 		}
@@ -753,7 +760,11 @@ public class DynamicEntryListWidget<E extends DynamicEntryListWidget.Entry> exte
 	//- 	if (super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) {
 	//- 		return true;
 	//# end
-		} else if (button == 0 && this.scrolling) {
+		//# if MC_VERSION_NUMBER >= 260300
+		} else if (this.scrolling) {
+		//# else
+		//- } else if (button == 0 && this.scrolling) {
+		//# end
 			if (mouseY < (double) this.top) {
 				this.setScrollYOffset(0.0D);
 			} else if (mouseY > (double) this.bottom) {

@@ -32,20 +32,28 @@ val testmodSourceSet = sourceSets.register("testmod") {
 	runtimeClasspath += sourceSets.main.get().runtimeClasspath
 }
 
-val wideners = extraSources.flatMap { it.listFiles { _, name -> name.endsWith(".accesswidener") }.orEmpty().toList() }
-mergedAccessWidenerDir.get().asFile.mkdirs()
-val merged = mergedAccessWidenerDir.get().file(mergedAccessWidenerName).asFile
-merged.createNewFile()
-val writer = merged.writer()
-writer.write("accessWidener v1 named\n")
-wideners.forEach {
-	it.bufferedReader().let { reader ->
-		reader.readLine()
-		writer.write(reader.readText())
-		reader.close()
+fun generateMergedAccessWidener() {
+	val wideners = extraSources.flatMap { it.listFiles { _, name -> name.endsWith(".accesswidener") }.orEmpty().toList() }
+	mergedAccessWidenerDir.get().asFile.mkdirs()
+	val merged = mergedAccessWidenerDir.get().file(mergedAccessWidenerName).asFile
+	merged.createNewFile()
+	val writer = merged.writer()
+	writer.write("accessWidener v1 named\n")
+	wideners.forEach {
+		it.bufferedReader().let { reader ->
+			reader.readLine()
+			writer.write(reader.readText())
+			reader.close()
+		}
+	}
+	writer.close()
+}
+generateMergedAccessWidener()
+tasks.processResources {
+	doFirst {
+		generateMergedAccessWidener()
 	}
 }
-writer.close()
 
 tasks.validateAccessWidener {
 	enabled = false
@@ -131,6 +139,7 @@ java {
 
 val jcyo = registerJcyoTask("jcyo", "src/main/java")
 val renderStateHelpersJcyo = registerJcyoTask("renderStateHelpersJcyo", "src/render-state-helpers/java")
+val customCursorsJcyo = registerJcyoTask("customCursorsJcyo", "src/custom-cursors/java")
 val testmodJcyo = registerJcyoTask("testmodJcyo", "src/testmod/java")
 fun registerJcyoTask(name: String, input: String): TaskProvider<JcyoTask> {
 	return tasks.register<JcyoTask>(name) {
@@ -144,7 +153,7 @@ fun registerJcyoTask(name: String, input: String): TaskProvider<JcyoTask> {
 }
 
 tasks.compileJava {
-	dependsOn(jcyo, renderStateHelpersJcyo)
+	dependsOn(jcyo, renderStateHelpersJcyo, customCursorsJcyo)
 }
 tasks.named("compileTestmodJava") {
 	dependsOn(testmodJcyo)

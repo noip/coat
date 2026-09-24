@@ -1,6 +1,10 @@
 package de.siphalor.coat.util.renderstate;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+//# if MC_VERSION_NUMBER >= 260300
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
+//# else
+//- import com.mojang.blaze3d.pipeline.RenderPipeline;
+//# end
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
